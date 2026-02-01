@@ -30,8 +30,8 @@ printFeatStats <- function(fList)
 #' @slot features List of features per analysis file. Use the \code{featureTable} method for access.
 #' @slot analysisInfo A \code{data.table} with the \link[=analysis-information]{analysis information}. Use the
 #'   \code{analysisInfo} method for access.
-#' @slot hasMobilities A \code{logical} that is \code{TRUE} if the features object contain mobility information. Use the
-#'   \code{hasMobilities} method for access.
+#' @slot hasIMS A \code{logical} that is \code{TRUE} if the features object contain mobility/CCS information. Use the
+#'   \code{hasIMS} method for access.
 #' @slot fromIMS A \code{logical} that is \code{TRUE} if the features object was directly created from IMS data
 #'   (\emph{i.e.} direct mobility assignment workflow). Use the \code{fromIMS} method for access.
 #'
@@ -65,7 +65,7 @@ printFeatStats <- function(fList)
 #'
 #' @export
 features <- setClass("features",
-                     slots = c(features = "list", analysisInfo = "data.table", hasMobilities = "logical",
+                     slots = c(features = "list", analysisInfo = "data.table", hasIMS = "logical",
                                fromIMS = "logical"),
                      contains = c("VIRTUAL", "workflowStep"))
 
@@ -73,8 +73,8 @@ setMethod("initialize", "features", function(.Object, ...)
 {
     .Object <- callNextMethod(.Object, ...)
     .Object@features <- makeEmptyListNamed(.Object@features)
-    if (length(.Object@hasMobilities) == 0)
-        .Object@hasMobilities <- FALSE # initialize
+    if (length(.Object@hasIMS) == 0)
+        .Object@hasIMS <- FALSE # initialize
     if (length(.Object@fromIMS) == 0)
         .Object@fromIMS <- FALSE # the case for most algorithms, so default to FALSE
     return(.Object)
@@ -82,7 +82,7 @@ setMethod("initialize", "features", function(.Object, ...)
 
 setMethod("clearMobilities", "features", function(obj)
 {
-    if (!hasMobilities(obj))
+    if (!hasIMS(obj))
         return(obj)
     
     featureTable(obj) <- lapply(featureTable(obj), function(ft)
@@ -95,7 +95,7 @@ setMethod("clearMobilities", "features", function(obj)
         return(ft)
     })
     
-    obj@hasMobilities <- FALSE
+    obj@hasIMS <- FALSE
     return(obj)
 })
 
@@ -118,7 +118,7 @@ setMethod("show", "features", function(object)
     printf("Average feature count/analysis: %.0f\n", if (length(object) > 0) sum(ftcounts) / nrow(analysisInfo(object)) else 0)
     printf("Least features: %s\n", names(object)[which.min(ftcounts)])
     printf("Most features: %s\n", names(object)[which.max(ftcounts)])
-    printf("Has IMS data: %s\n", if (hasMobilities(object)) "yes" else "no")
+    printf("Has IMS data: %s\n", if (hasIMS(object)) "yes" else "no")
     showAnaInfo(analysisInfo(object))
 })
 
@@ -201,7 +201,7 @@ setMethod("replicates", "features", function(obj) unique(analysisInfo(obj)$repli
 
 #' @describeIn features Returns \code{TRUE} if the features object has mobility information.
 #' @export
-setMethod("hasMobilities", "features", function(obj) obj@hasMobilities)
+setMethod("hasIMS", "features", function(obj) obj@hasIMS)
 
 #' @describeIn features Returns \code{TRUE} if the features object was directly created from IMS data.
 #' @export
@@ -236,7 +236,7 @@ setMethod("filter", "features", function(obj, absMinIntensity = NULL, relMinInte
     checkmate::assertFlag(negate, add = ac)
     checkmate::reportAssertions(ac)
 
-    if (!is.null(IMSRangeParams) && !hasMobilities(obj))
+    if (!is.null(IMSRangeParams) && !hasIMS(obj))
         stop("Cannot apply IMS Range filter: no mobilities assigned", call. = FALSE)
     
     if (length(obj) == 0)

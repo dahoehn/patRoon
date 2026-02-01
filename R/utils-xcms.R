@@ -113,7 +113,7 @@ setMethod("getXCMSSet", "features", function(obj, verbose, loadRawData, IMS = FA
     checkmate::assertFlag(verbose)
     assertIMSArg(IMS)
     
-    if (IMS != "both" && hasMobilities(obj))
+    if (IMS != "both" && hasIMS(obj))
         obj <- selectIMSFilterFeatures(obj, IMS)
 
     xs <- new(getClassDef("xcmsSet", package = "xcms"))
@@ -164,7 +164,7 @@ setMethod("getXCMSSet", "features", function(obj, verbose, loadRawData, IMS = FA
 #' @export
 setMethod("getXCMSSet", "featuresXCMS", function(obj, ...)
 {
-    if (hasMobilities(obj))
+    if (hasIMS(obj))
         return(callNextMethod())
     return(obj@xs)
 })
@@ -177,7 +177,7 @@ setMethod("getXCMSSet", "featureGroups", function(obj, verbose, loadRawData, IMS
     checkmate::assertFlag(verbose)
     assertIMSArg(IMS)
 
-    if (IMS != "both" && hasMobilities(obj))
+    if (IMS != "both" && hasIMS(obj))
         obj <- selectIMSFilter(obj, IMS = IMS, verbose = FALSE)
     
     if (verbose)
@@ -197,7 +197,7 @@ setMethod("getXCMSSet", "featureGroupsXCMS", function(obj, verbose, loadRawData,
 {
     # first see if we can just return the xcmsSet used during grouping
 
-    if (hasMobilities(obj))
+    if (hasIMS(obj))
         return(callNextMethod())
     
     anaInfo <- analysisInfo(obj)
@@ -227,7 +227,7 @@ setMethod("getXCMSnExp", "features", function(obj, verbose, loadRawData, IMS = F
     checkmate::assertFlag(loadRawData)
     assertIMSArg(IMS)
     
-    if (IMS != "both" && hasMobilities(obj))
+    if (IMS != "both" && hasIMS(obj))
         obj <- selectIMSFilterFeatures(obj, IMS)
     
     rawData <- NULL
@@ -308,7 +308,7 @@ setMethod("getXCMSnExp", "features", function(obj, verbose, loadRawData, IMS = F
 setMethod("getXCMSnExp", "featuresXCMS3", function(obj, ...)
 {
     # first verify if we can just return the embedded xcms object
-    if (hasMobilities(obj) ||
+    if (hasIMS(obj) ||
         !all(simplifyAnalysisNames(Biobase::pData(obj@xdata)$sample_name) == analysisInfo(obj)$analysis))
         return(callNextMethod())
     
@@ -322,7 +322,7 @@ setMethod("getXCMSnExp", "featureGroups", function(obj, verbose, loadRawData, IM
     checkmate::assertFlag(verbose)
     assertIMSArg(IMS)
     
-    if (IMS != "both" && hasMobilities(obj))
+    if (IMS != "both" && hasIMS(obj))
         obj <- selectIMSFilter(obj, IMS = IMS, verbose = FALSE)
     
     if (verbose)
@@ -361,7 +361,7 @@ setMethod("getXCMSnExp", "featureGroupsXCMS3", function(obj, verbose, loadRawDat
 
     anaInfo <- analysisInfo(obj)
 
-    if (hasMobilities(obj) || nrow(Biobase::pData(obj@xdata)) != length(anaInfo$analysis) ||
+    if (hasIMS(obj) || nrow(Biobase::pData(obj@xdata)) != length(anaInfo$analysis) ||
         !all(simplifyAnalysisNames(Biobase::pData(obj@xdata)$sample_name) == anaInfo$analysis))
         return(callNextMethod())
 
